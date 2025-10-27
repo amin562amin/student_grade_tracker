@@ -19,5 +19,21 @@ namespace StudentGradeTracker
             age = age1;
             grade = grade1;
         }
+
+
+        public string GetName()
+        {
+            return name;
+        }
+
+        public int GetAge()
+        {
+            return age;   
+        }
+
+        public string GetGrade()
+        {
+            return grade;    
+        }
     }
 }

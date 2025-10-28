@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.IO;
 
 namespace StudentGradeTracker
 {
@@ -22,10 +22,10 @@ namespace StudentGradeTracker
                 LoadStudents(students);
             }
 
-           
 
-           // Start the main menu loop
-            DisplayMenu(students);      
+
+            // Start the main menu loop
+            DisplayMenu(students);
         }
 
         /// <summary>
@@ -33,20 +33,24 @@ namespace StudentGradeTracker
         /// Loops until the user chooses to exit.
         /// </summary>
         /// 
-        /// <param name="students">The list of students to manage</param >
-       
+        /// <param name = "students"> The list of students to manage</param >
 
 
-        static void DisplayMenu (List<Student> students)
+
+        static void DisplayMenu(List<Student> students)
         {
-            
+
             bool running = true;
             while (running)
             {
                 // Show menu options 
                 Console.WriteLine("1. Add Student");
                 Console.WriteLine("2. View all students");
-                Console.WriteLine("3. Exit");
+                Console.WriteLine("3. Search a specific student");
+                Console.WriteLine("4. Edit a student's details");
+                Console.WriteLine("5. Delete a student's details");
+                Console.WriteLine("6. Sort how student info is displayed");
+                Console.WriteLine("7. Exit");
                 Console.WriteLine("Please choose an option by entering a number");
 
                 // Read user input aand safely parse to integer 
@@ -74,9 +78,26 @@ namespace StudentGradeTracker
                 }
                 else if (response == 3)
                 {
+                    SearchStudents(students);
+                }
+                else if (response == 4)
+                {
+                    EditStudents(students);
+                }
+                else if (response == 5)
+                {
+                    DeleteStudents(students);
+                }
+                else if (response == 6)
+                {
+                    SortStudents(students);
+                }
+                else if (response == 7)
+                {
                     SaveStudents(students);
                     running = false; // Exit the loop, program will end 
                 }
+
                 else
                 {
                     Console.WriteLine("Im sorry but you didnt enter a valid input please try again");
@@ -89,7 +110,7 @@ namespace StudentGradeTracker
         /// Prompts the user to enter student details and adds a new Student object to the list.
         /// </summary>
         /// <param name="students">The list of students to add to</param>
-        
+
 
 
         static void AddStudent(List<Student> students)
@@ -112,7 +133,7 @@ namespace StudentGradeTracker
 
             // Create a new Student object 
 
-            Student a = new Student(student_name,student_age,student_grade);
+            Student a = new Student(student_name, student_age, student_grade);
 
             // Display the newly added student's details 
 
@@ -120,7 +141,7 @@ namespace StudentGradeTracker
                    $"{a.GetAge()}\n {a.GetGrade()}");
 
             // add the student to the list 
-            students.Add (a);
+            students.Add(a);
         }
 
         /// <summary>
@@ -145,12 +166,12 @@ namespace StudentGradeTracker
             for (int i = 0; i < students.Count; i++)
             {
 
-                
-                    Console.WriteLine($"Student #{i + 1} details:");
-                    Console.WriteLine($"Name: {students[i].GetName()}");
-                    Console.WriteLine($"Age: {students[i].GetAge()}");
-                    Console.WriteLine($"Grade: {students[i].GetGrade()}\n");
-                
+
+                Console.WriteLine($"Student #{i + 1} details:");
+                Console.WriteLine($"Name: {students[i].GetName()}");
+                Console.WriteLine($"Age: {students[i].GetAge()}");
+                Console.WriteLine($"Grade: {students[i].GetGrade()}\n");
+
 
             }
 
@@ -171,26 +192,26 @@ namespace StudentGradeTracker
         static void LoadStudents(List<Student> students)
         {
             string[] fileLines = File.ReadAllLines(fileName);
-            string name,grade;
+            string name, grade;
             int age;
 
-            
-                for (int i = 1; i < fileLines.Length; i++)
-                {
-                    string[] LinePart = fileLines[i].Split(',');
 
-                    if (LinePart.Length == 3)
+            for (int i = 1; i < fileLines.Length; i++)
+            {
+                string[] LinePart = fileLines[i].Split(',');
+
+                if (LinePart.Length == 3)
+                {
+                    name = LinePart[0];
+                    grade = LinePart[2];
+                    if (int.TryParse(LinePart[1], out age))
                     {
-                        name = LinePart[0];
-                        grade = LinePart[2];
-                        if (int.TryParse(LinePart[1], out age))
-                        {
-                            students.Add(new Student(name, age, grade));
-                        }
+                        students.Add(new Student(name, age, grade));
                     }
                 }
             }
-        
+        }
+
 
         /// <summary>
         /// Save the contents of the list containing student details to a file 
@@ -211,15 +232,83 @@ namespace StudentGradeTracker
 
                 foreach (Student student in students)
                 {
-                  
+
                     line = $"{student.GetName()},{student.GetAge()},{student.GetGrade()}";
-                    format_Lines.Add (line);
+                    format_Lines.Add(line);
 
                 }
                 File.WriteAllLines(fileName, format_Lines);
             }
 
         }
+        ///<summary>
+        ///Allow the User to search and view a specific student's details
+        /// </summary>
+        /// <param name = "students"></param>  
+        static void SearchStudents(List<Student>students)
+        {
+            string Name;           
+            bool check = true;
+            
+            while (check)
+            {
+                // Prompt user for student name
+
+                Console.WriteLine("Please enter the name of the student you would like to search");
+                Name = Console.ReadLine();
+
+                bool found = false;
+
+                // search through all students for a match
+
+                foreach (Student student in students)
+                {
+                    // Case-insensitive name comparison
+
+                    if (student.GetName() == Name)
+                    {
+                       // Display student details
+
+                        Console.WriteLine($"Name: {student.GetName()}");
+                        Console.WriteLine($"Age: {student.GetAge()}");
+                        Console.WriteLine($"Grade: {student.GetGrade()}\n");
+                        found = true;
+                        break; // Stop searching once found 
+                    }                  
+                }
+                Console.WriteLine("Would you like to keep searching Y or N");
+                string repsonse = Console.ReadLine().ToUpper();
+                // Notify user if student wasn't found  
+
+                if (repsonse == "N")
+                {
+                    check = false; // Exit search loop
+                }
+                if (!found)
+                {
+                    Console.WriteLine("Invalid student name entered");
+                }
+
+                
+            }
+            // Pause so the user can read the output before returning to menu 
+
+            Console.WriteLine("Press Enter to return to the menu.");
+            Console.ReadLine(); // just waits for the user, then goes back to the menu loop
+        }
+        static void EditStudents(List<Student>students)
+        {
+            
+        }
+        static void DeleteStudents(List<Student>students)
+        {
+            
+        }
+        static void SortStudents(List<Student>students)
+        {
+            
+        }
+
 
     }
 }
